@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PayDesk — Global Payment Solutions</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0b0d18;--ink2:#13162a;--white:#f0eff5;
+  --purple:#5b4fcf;--purpleL:#7c6fe0;--purpleD:#3d33a0;
+  --gold:#f0b429;--green:#22c55e;--red:#ef4444;--sky:#38bdf8;
+  --token:#f59e0b;
+  --glass:rgba(255,255,255,0.055);--glassH:rgba(255,255,255,0.09);
+  --border:rgba(255,255,255,0.09);--borderH:rgba(255,255,255,0.18);
+  --text2:rgba(240,239,245,0.48);--text3:rgba(240,239,245,0.28);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--ink);color:var(--white);font-family:'DM Sans',sans-serif;font-size:15px;}
+.bg-glow{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 70% 60% at 10% 10%,rgba(91,79,207,.2) 0%,transparent 65%),
+    radial-gradient(ellipse 50% 40% at 90% 80%,rgba(91,79,207,.13) 0%,transparent 60%),
+    radial-gradient(ellipse 40% 30% at 60% 40%,rgba(245,158,11,.05) 0%,transparent 70%);}
+.bg-grain{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.3;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E");}
+.screen{position:fixed;inset:0;z-index:1;display:none;overflow-y:auto;}
+.screen.active{display:flex;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── LOGIN ── */
+#loginScreen{align-items:center;justify-content:center;padding:20px;animation:fadeIn .5s ease;}
+.login-box{width:100%;max-width:420px;background:var(--glass);border:1px solid var(--border);border-radius:24px;padding:44px 40px;backdrop-filter:blur(18px);box-shadow:0 32px 80px rgba(0,0,0,.5);}
+.login-logo{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:28px;}
+.login-logo-icon{width:44px;height:44px;border-radius:13px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;box-shadow:0 0 24px rgba(91,79,207,.5);}
+.login-logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;letter-spacing:-.02em;}
+.login-title{text-align:center;font-family:'Syne',sans-serif;font-weight:700;font-size:1.35rem;margin-bottom:4px;}
+.login-sub{text-align:center;color:var(--text2);font-size:.82rem;margin-bottom:28px;}
+.demo-hint{background:rgba(91,79,207,.1);border:1px solid rgba(91,79,207,.25);border-radius:10px;padding:12px 16px;margin-bottom:22px;font-size:.78rem;color:#a89cf5;line-height:1.6;}
+.demo-hint strong{color:var(--purpleL);}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);margin-bottom:5px;}
+.field input{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:13px 16px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s,box-shadow .2s;}
+.field input:focus{border-color:var(--purpleL);box-shadow:0 0 0 3px rgba(91,79,207,.18);}
+.field input::placeholder{color:var(--text3);}
+.login-btn{width:100%;margin-top:6px;background:var(--purple);color:var(--white);border:none;padding:14px;border-radius:12px;font-size:.95rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .25s;box-shadow:0 0 28px rgba(91,79,207,.35);}
+.login-btn:hover{background:var(--purpleL);transform:translateY(-1px);}
+.login-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+.login-err{color:var(--red);font-size:.78rem;text-align:center;margin-top:10px;display:none;background:rgba(239,68,68,.08);border-radius:8px;padding:8px;}
+
+/* ── APP SHELL ── */
+#appScreen{flex-direction:column;align-items:stretch;animation:fadeIn .4s ease;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 24px;border-bottom:1px solid var(--border);background:rgba(11,13,24,.88);backdrop-filter:blur(16px);position:sticky;top:0;z-index:50;flex-shrink:0;flex-wrap:wrap;gap:8px;}
+.tb-logo{display:flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;letter-spacing:-.02em;}
+.tb-logo-icon{width:30px;height:30px;border-radius:8px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:800;}
+.tb-nav{display:flex;gap:3px;flex-wrap:wrap;}
+.tb-btn{padding:6px 12px;border-radius:100px;font-size:.76rem;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--white);font-family:'DM Sans',sans-serif;transition:all .2s;white-space:nowrap;}
+.tb-btn:hover,.tb-btn.on{background:var(--purple);border-color:var(--purple);}
+.tb-right{display:flex;align-items:center;gap:8px;}
+.tb-avatar{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--purple),var(--purpleL));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82rem;}
+.tb-name{font-size:.8rem;font-weight:500;}
+.tb-logout{background:transparent;border:1px solid var(--border);color:var(--text2);padding:5px 10px;border-radius:7px;font-size:.72rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.tb-logout:hover{border-color:var(--red);color:var(--red);}
+
+.app-body{flex:1;overflow-y:auto;padding:22px;}
+.tab-view{display:none;animation:fadeIn .3s ease;}
+.tab-view.on{display:block;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:rgba(91,79,207,.4);border-radius:2px;}
+
+/* ── COMMON ── */
+.card{background:var(--glass);border:1px solid var(--border);border-radius:18px;padding:22px;backdrop-filter:blur(12px);}
+.section-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:16px;}
+.form-label{font-size:.69rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);margin-bottom:5px;display:block;}
+.form-input{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:9px;padding:11px 14px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;transition:border-color .2s,box-shadow .2s;}
+.form-input:focus{border-color:var(--purpleL);box-shadow:0 0 0 3px rgba(91,79,207,.15);}
+.form-input::placeholder{color:var(--text3);}
+select.form-input option{background:#1a1d2e;}
+.form-group{margin-bottom:13px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+@media(max-width:640px){.grid2{grid-template-columns:1fr;}}
+
+/* ── HOME TAB ── */
+/* WALLET CARDS ROW */
+.wallets-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;}
+@media(max-width:560px){.wallets-row{grid-template-columns:1fr;}}
+
+/* INR WALLET */
+.inr-wallet{
+  background:linear-gradient(135deg,rgba(91,79,207,.28),rgba(91,79,207,.1));
+  border:1px solid rgba(91,79,207,.3);border-radius:20px;padding:24px;
+  position:relative;overflow:hidden;
+}
+.inr-wallet::before{content:'';position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(91,79,207,.12);}
+.w-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);margin-bottom:5px;}
+.w-bal{font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;letter-spacing:-.025em;}
+.w-sub{font-size:.75rem;color:var(--text2);margin-top:4px;}
+.w-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.08);border-radius:6px;padding:3px 8px;font-size:.7rem;margin-top:8px;}
+
+/* TOKEN WALLET */
+.token-wallet{
+  background:linear-gradient(135deg,rgba(245,158,11,.22),rgba(245,158,11,.07));
+  border:1px solid rgba(245,158,11,.3);border-radius:20px;padding:24px;
+  position:relative;overflow:hidden;cursor:pointer;transition:all .2s;
+}
+.token-wallet:hover{border-color:rgba(245,158,11,.5);transform:translateY(-2px);}
+.token-wallet::before{content:'🪙';position:absolute;top:12px;right:16px;font-size:2rem;opacity:.3;}
+.token-bal{font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;letter-spacing:-.025em;color:var(--token);}
+.token-sub{font-size:.75rem;color:rgba(245,158,11,.6);margin-top:4px;}
+
+/* QUICK ACTIONS */
+.qactions{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+@media(max-width:500px){.qactions{grid-template-columns:repeat(2,1fr);}}
+.qa{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:14px 10px;cursor:pointer;transition:all .2s;text-align:center;}
+.qa:hover{background:var(--glassH);border-color:var(--borderH);transform:translateY(-2px);}
+.qa-icon{font-size:1.3rem;margin-bottom:5px;}
+.qa-label{font-size:.7rem;color:var(--text2);}
+
+/* STATS */
+.stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;}
+@media(max-width:480px){.stats3{grid-template-columns:repeat(2,1fr);}}
+.stat-card{background:var(--glass);border:1px solid var(--border);border-radius:13px;padding:16px;}
+.stat-lbl{font-size:.67rem;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.stat-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;}
+
+/* TX LIST */
+.tx-card{background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:4px 18px;}
+.tx-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;border-radius:4px;transition:all .15s;}
+.tx-row:last-child{border-bottom:none;}
+.tx-row:hover{background:rgba(255,255,255,.03);padding-left:5px;padding-right:5px;}
+.tx-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;}
+.tx-info{flex:1;margin-left:11px;}
+.tx-name{font-weight:500;font-size:.85rem;}
+.tx-meta{font-size:.69rem;color:var(--text3);margin-top:2px;}
+.tx-right{text-align:right;}
+.tx-amt{font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;}
+.cr{color:var(--green);}.dr{color:var(--red);}
+.tx-st{font-size:.67rem;margin-top:2px;}
+.st-ok{color:var(--green);}.st-pend{color:var(--gold);}.st-fail{color:var(--red);}
+.tx-converted{font-size:.68rem;color:var(--token);margin-top:1px;}
+
+/* ── SEND TAB ── */
+.send-type-toggle{display:flex;gap:8px;margin-bottom:20px;}
+.stt-btn{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;transition:all .2s;text-align:center;}
+.stt-btn.on{background:var(--purple);border-color:var(--purple);color:var(--white);}
+.send-section{display:none;}
+.send-section.on{display:block;animation:slideUp .3s ease;}
+
+/* COUNTRY SELECTOR */
+.country-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+@media(max-width:500px){.country-grid{grid-template-columns:repeat(3,1fr);}}
+.country-btn{background:var(--glass);border:1px solid var(--border);border-radius:11px;padding:10px 6px;cursor:pointer;text-align:center;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.country-btn:hover,.country-btn.sel{background:rgba(91,79,207,.2);border-color:rgba(91,79,207,.5);}
+.country-flag{font-size:1.4rem;display:block;margin-bottom:3px;}
+.country-name{font-size:.65rem;color:var(--text2);}
+.country-btn.sel .country-name{color:var(--purpleL);}
+
+/* FX CONVERTER */
+.fx-box{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:14px;padding:16px;margin-bottom:14px;}
+.fx-title{font-size:.72rem;color:rgba(245,158,11,.8);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.fx-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.fx-currency{font-weight:600;font-size:.85rem;min-width:50px;}
+.fx-input{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:10px 12px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;}
+.fx-input:focus{border-color:rgba(245,158,11,.5);}
+.fx-arrow{font-size:1.1rem;color:var(--token);text-align:center;}
+.fx-rate{font-size:.72rem;color:var(--text3);text-align:right;}
+.fx-converted-big{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--token);}
+
+/* TOKEN FLOW */
+.token-flow{background:rgba(91,79,207,.08);border:1px solid rgba(91,79,207,.2);border-radius:12px;padding:14px;margin-bottom:14px;font-size:.8rem;line-height:1.7;color:var(--text2);}
+.token-flow strong{color:var(--purpleL);}
+.token-flow .arrow{color:var(--gold);margin:0 4px;}
+
+/* QUICK AMTS */
+.quick-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:13px;}
+.qa-chip{padding:5px 11px;border-radius:7px;font-size:.73rem;cursor:pointer;background:rgba(91,79,207,.12);border:1px solid rgba(91,79,207,.25);color:#a89cf5;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.qa-chip:hover{background:rgba(91,79,207,.25);color:var(--white);}
+
+.pay-btn{width:100%;margin-top:14px;padding:13px;border-radius:11px;font-size:.92rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;border:none;transition:all .25s;}
+.btn-purple{background:var(--purple);color:var(--white);box-shadow:0 0 22px rgba(91,79,207,.3);}
+.btn-purple:hover{background:var(--purpleL);transform:translateY(-1px);box-shadow:0 8px 28px rgba(91,79,207,.45);}
+.btn-token{background:linear-gradient(135deg,#d97706,var(--token));color:#1a0e00;font-weight:700;box-shadow:0 0 22px rgba(245,158,11,.3);}
+.btn-token:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(245,158,11,.4);}
+.btn-green{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3);}
+.btn-green:hover{background:rgba(34,197,94,.22);transform:translateY(-1px);}
+
+/* ── TOKEN WALLET TAB ── */
+.token-header{background:linear-gradient(135deg,rgba(245,158,11,.2),rgba(245,158,11,.06));border:1px solid rgba(245,158,11,.25);border-radius:20px;padding:28px;margin-bottom:18px;}
+.token-big-bal{font-family:'Syne',sans-serif;font-weight:800;font-size:2.2rem;color:var(--token);letter-spacing:-.025em;}
+.token-inr-eq{font-size:.82rem;color:rgba(245,158,11,.55);margin-top:4px;}
+.token-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+.ta-btn{display:flex;align-items:center;gap:7px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);border-radius:11px;padding:10px 16px;cursor:pointer;font-size:.8rem;font-weight:500;transition:all .2s;font-family:'DM Sans',sans-serif;color:var(--white);}
+.ta-btn:hover{background:rgba(245,158,11,.22);border-color:rgba(245,158,11,.5);}
+
+/* SUPPORTED CURRENCIES */
+.curr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;}
+@media(max-width:500px){.curr-grid{grid-template-columns:repeat(2,1fr);}}
+.curr-card{background:var(--glass);border:1px solid var(--border);border-radius:13px;padding:14px;transition:all .2s;cursor:default;}
+.curr-card:hover{border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.05);}
+.curr-flag{font-size:1.5rem;margin-bottom:6px;}
+.curr-name{font-size:.78rem;font-weight:600;margin-bottom:2px;}
+.curr-rate{font-size:.7rem;color:var(--text3);}
+.curr-symbol{font-size:.75rem;color:var(--token);}
+
+/* ADD TOKEN */
+.add-token-card{background:var(--glass);border:1px solid rgba(245,158,11,.2);border-radius:16px;padding:20px;margin-bottom:18px;}
+.add-token-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;color:var(--token);margin-bottom:14px;}
+.token-calc{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:10px;padding:12px;margin:10px 0;}
+.token-calc-row{display:flex;justify-content:space-between;font-size:.8rem;padding:3px 0;}
+.token-calc-row.total{font-weight:600;border-top:1px solid rgba(245,158,11,.15);margin-top:6px;padding-top:6px;color:var(--token);}
+
+/* ── RECEIVE TAB ── */
+.recv-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+@media(max-width:600px){.recv-grid{grid-template-columns:1fr;}}
+.qr-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;padding:10px 0;}
+.qr-svg{width:150px;height:150px;border-radius:13px;padding:10px;background:rgba(255,255,255,.95);}
+.upi-pill{background:rgba(91,79,207,.1);border:1px solid rgba(91,79,207,.2);border-radius:8px;padding:7px 14px;font-size:.78rem;color:#a89cf5;text-align:center;}
+.copy-btn{background:transparent;border:1px solid var(--border);color:var(--text2);padding:6px 14px;border-radius:7px;font-size:.73rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.copy-btn:hover{border-color:var(--purpleL);color:var(--purpleL);}
+
+/* ── HISTORY TAB ── */
+.hist-filters{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
+.hf{padding:5px 12px;border-radius:7px;font-size:.73rem;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:'DM Sans',sans-serif;transition:all .2s;}
+.hf:hover,.hf.on{background:var(--purple);border-color:var(--purple);color:var(--white);}
+
+/* ── MODALS ── */
+.overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:16px;}
+.overlay.show{display:flex;animation:fadeIn .25s ease;}
+.modal{background:#13162a;border:1px solid var(--border);border-radius:22px;padding:32px;width:100%;max-width:400px;box-shadow:0 32px 80px rgba(0,0,0,.7);}
+.modal-icon{font-size:2.2rem;text-align:center;margin-bottom:10px;}
+.modal-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;text-align:center;margin-bottom:4px;}
+.modal-sub{color:var(--text2);font-size:.8rem;text-align:center;margin-bottom:20px;line-height:1.5;}
+.detail-box{background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:18px;}
+.detail-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:.82rem;}
+.detail-row:not(:last-child){border-bottom:1px solid rgba(255,255,255,.06);}
+.dk{color:var(--text2);}
+.dv{font-weight:500;}
+.dv.big{font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;color:var(--gold);}
+.dv.token{color:var(--token);}
+.dv.green{color:var(--green);}
+/* token flow steps */
+.flow-steps{background:rgba(91,79,207,.08);border:1px solid rgba(91,79,207,.18);border-radius:10px;padding:12px;margin-bottom:18px;font-size:.78rem;line-height:1.8;color:var(--text2);}
+.flow-steps strong{color:#a89cf5;}
+.flow-steps .step{display:flex;align-items:flex-start;gap:8px;margin-bottom:4px;}
+.step-num{background:var(--purple);color:var(--white);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;flex-shrink:0;margin-top:2px;}
+
+/* PIN */
+.pin-group{display:flex;gap:10px;justify-content:center;margin-bottom:20px;}
+.pin-dot{width:46px;height:50px;border-radius:9px;text-align:center;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--white);font-size:1.3rem;outline:none;font-family:'DM Sans',sans-serif;transition:border-color .2s;}
+.pin-dot:focus{border-color:var(--purpleL);}
+.modal-btns{display:flex;gap:10px;}
+.m-cancel{flex:1;background:transparent;border:1px solid var(--border);color:var(--text2);padding:11px;border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;transition:all .2s;}
+.m-cancel:hover{border-color:var(--borderH);color:var(--white);}
+.m-confirm{flex:2;background:var(--purple);color:var(--white);border:none;padding:11px;border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;transition:all .2s;}
+.m-confirm:hover{background:var(--purpleL);}
+.m-confirm.token-confirm{background:linear-gradient(135deg,#d97706,var(--token));color:#1a0e00;}
+
+/* RESULT */
+.result-anim{font-size:3.5rem;margin-bottom:14px;animation:pop .4s cubic-bezier(.17,.67,.35,1.4);text-align:center;}
+.receipt{background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:14px;margin:14px 0;text-align:left;}
+.r-row{display:flex;justify-content:space-between;padding:5px 0;font-size:.8rem;}
+.r-row:not(:last-child){border-bottom:1px solid rgba(255,255,255,.06);}
+.r-key{color:var(--text2);}
+.r-val{font-weight:500;}
+.r-id{font-size:.68rem;color:var(--text3);text-align:center;margin-bottom:14px;}
+.done-btn{width:100%;border:none;padding:13px;border-radius:11px;font-size:.9rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.done-green{background:var(--green);color:#0b1a0f;box-shadow:0 0 18px rgba(34,197,94,.3);}
+.done-green:hover{transform:translateY(-1px);}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;z-index:300;border-radius:11px;padding:12px 16px;display:flex;align-items:center;gap:8px;transform:translateY(60px);opacity:0;transition:all .3s cubic-bezier(.17,.67,.35,1.2);pointer-events:none;backdrop-filter:blur(16px);font-size:.81rem;font-weight:500;}
+.toast.show{transform:translateY(0);opacity:1;}
+
+/* LIVE RATE TICKER */
+.rate-ticker{display:flex;gap:12px;overflow-x:auto;padding:10px 0;margin-bottom:16px;scrollbar-width:none;}
+.rate-ticker::-webkit-scrollbar{display:none;}
+.rate-pill{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:8px 14px;white-space:nowrap;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.rate-flag{font-size:1rem;}
+.rate-text{font-size:.75rem;}
+.rate-val{font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;}
+.rate-chg{font-size:.67rem;}
+
+@media(max-width:460px){
+  .topbar{padding:10px 14px;}
+  .app-body{padding:14px;}
+  .w-bal,.token-bal,.token-big-bal{font-size:1.5rem;}
+  .login-box{padding:28px 20px;}
+  .country-grid{grid-template-columns:repeat(3,1fr);}
+  .curr-grid{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+<div class="bg-grain"></div>
+
+<!-- ════ LOGIN ════ -->
+<div class="screen active" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-icon">₹</div>
+      <div class="login-logo-text">PayDesk</div>
+    </div>
+    <div class="login-title">Sign In</div>
+    <div class="login-sub">Enter your credentials to continue</div>
+    <div class="demo-hint">
+      🔑 <strong>Demo Login:</strong> Username: <strong>mukund</strong> &nbsp;·&nbsp; Password: <strong>paydesk123</strong><br>
+      PIN: <strong>1 2 3 4</strong>
+    </div>
+    <div class="field"><label>Username</label><input type="text" id="loginUser" placeholder="Enter username" autocomplete="off"></div>
+    <div class="field"><label>Password</label><input type="password" id="loginPass" placeholder="Enter password"></div>
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">Sign In →</button>
+    <div class="login-err" id="loginErr">❌ Invalid credentials</div>
+  </div>
+</div>
+
+<!-- ════ APP ════ -->
+<div class="screen" id="appScreen">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="tb-logo"><div class="tb-logo-icon">₹</div> PayDesk</div>
+    <div class="tb-nav">
+      <button class="tb-btn on" onclick="showTab('home',this)">🏠 Home</button>
+      <button class="tb-btn" onclick="showTab('send',this)">💸 Send</button>
+      <button class="tb-btn" onclick="showTab('receive',this)">📥 Receive</button>
+      <button class="tb-btn" onclick="showTab('token',this)">🪙 Token</button>
+      <button class="tb-btn" onclick="showTab('history',this)">📋 History</button>
+    </div>
+    <div class="tb-right">
+      <div class="tb-avatar" id="tbAv">M</div>
+      <span class="tb-name" id="tbNm">Mukund</span>
+      <button class="tb-logout" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="app-body">
+
+    <!-- ═══ HOME ═══ -->
+    <div class="tab-view on" id="tab-home">
+      <!-- LIVE RATES TICKER -->
+      <div class="rate-ticker" id="rateTicker"></div>
+
+      <!-- WALLETS -->
+      <div class="wallets-row">
+        <div class="inr-wallet">
+          <div class="w-label">INR Wallet</div>
+          <div class="w-bal" id="inrBal">₹2,45,000</div>
+          <div class="w-sub" id="homeUPI">mukund@paydesk</div>
+          <div class="w-badge">🇮🇳 India · UPI</div>
+        </div>
+        <div class="token-wallet" onclick="showTab('token',document.querySelectorAll('.tb-btn')[3])">
+          <div class="w-label">Token Wallet 🪙</div>
+          <div class="token-bal" id="tokenBal">2,450 PDT</div>
+          <div class="token-sub" id="tokenInrEq">≈ ₹2,450 (1 PDT = ₹1)</div>
+          <div class="w-badge" style="background:rgba(245,158,11,.12);color:rgba(245,158,11,.8)">🌍 Global · Multi-Currency</div>
+        </div>
+      </div>
+
+      <div class="stats3">
+        <div class="stat-card"><div class="stat-lbl">Sent Today</div><div class="stat-val" id="statSent">₹0</div></div>
+        <div class="stat-card"><div class="stat-lbl">Received</div><div class="stat-val" id="statRecv">₹0</div></div>
+        <div class="stat-card"><div class="stat-lbl">Transactions</div><div class="stat-val" id="statCnt">0</div></div>
+      </div>
+
+      <div class="qactions">
+        <div class="qa" onclick="showTab('send',document.querySelectorAll('.tb-btn')[1]);setSendType('india')">
+          <div class="qa-icon">🇮🇳</div><div class="qa-label">Send India</div>
+        </div>
+        <div class="qa" onclick="showTab('send',document.querySelectorAll('.tb-btn')[1]);setSendType('global')">
+          <div class="qa-icon">🌍</div><div class="qa-label">Send Global</div>
+        </div>
+        <div class="qa" onclick="showTab('receive',document.querySelectorAll('.tb-btn')[2])">
+          <div class="qa-icon">📥</div><div class="qa-label">Receive</div>
+        </div>
+        <div class="qa" onclick="showTab('token',document.querySelectorAll('.tb-btn')[3])">
+          <div class="qa-icon">🪙</div><div class="qa-label">Token Wallet</div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div class="section-title" style="margin-bottom:0">Recent Transactions</div>
+        <button style="background:none;border:none;color:#a89cf5;font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif" onclick="showTab('history',document.querySelectorAll('.tb-btn')[4])">See all →</button>
+      </div>
+      <div class="tx-card"><div id="recentList"><div style="padding:32px 0;text-align:center;color:var(--text3);font-size:.82rem">No transactions yet — make a payment!</div></div></div>
+    </div>
+
+    <!-- ═══ SEND ═══ -->
+    <div class="tab-view" id="tab-send">
+      <div class="section-title">Send Payment</div>
+      <div class="send-type-toggle">
+        <button class="stt-btn on" id="sttIndia" onclick="setSendType('india')">🇮🇳 India (UPI)</button>
+        <button class="stt-btn" id="sttGlobal" onclick="setSendType('global')">🌍 Global (Token)</button>
+      </div>
+
+      <!-- INDIA SEND -->
+      <div class="send-section on" id="sendIndia">
+        <div class="card">
+          <div class="form-group">
+            <label class="form-label">Recipient UPI ID</label>
+            <input class="form-input" id="s_vpa" placeholder="friend@okaxis">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Amount (₹)</label>
+            <input class="form-input" id="s_amt" type="number" placeholder="0.00" min="1">
+          </div>
+          <div class="quick-row">
+            <button class="qa-chip" onclick="document.getElementById('s_amt').value=500">₹500</button>
+            <button class="qa-chip" onclick="document.getElementById('s_amt').value=1000">₹1K</button>
+            <button class="qa-chip" onclick="document.getElementById('s_amt').value=2000">₹2K</button>
+            <button class="qa-chip" onclick="document.getElementById('s_amt').value=5000">₹5K</button>
+            <button class="qa-chip" onclick="document.getElementById('s_amt').value=10000">₹10K</button>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Note</label>
+            <input class="form-input" id="s_note" placeholder="What's this for?">
+          </div>
+          <button class="pay-btn btn-purple" onclick="initSend('india')">Send via UPI →</button>
+        </div>
+      </div>
+
+      <!-- GLOBAL SEND -->
+      <div class="send-section" id="sendGlobal">
+        <div class="card">
+          <!-- COUNTRY SELECT -->
+          <label class="form-label" style="margin-bottom:10px">Select Destination Country</label>
+          <div class="country-grid" id="countryGrid"></div>
+
+          <div class="form-group">
+            <label class="form-label">Recipient Name / Account</label>
+            <input class="form-input" id="g_recip" placeholder="eg: Ivan Petrov / +7 900 123 4567">
+          </div>
+
+          <!-- FX CONVERTER -->
+          <div class="fx-box" id="fxBox">
+            <div class="fx-title">🔄 Live FX Converter — Powered by Token Wallet</div>
+            <div class="fx-row">
+              <span class="fx-currency">₹ INR</span>
+              <input class="fx-input" id="g_inr" type="number" placeholder="Amount in INR" oninput="calcFX()">
+            </div>
+            <div style="text-align:center;padding:4px 0;color:var(--token);font-size:1rem">⬇️</div>
+            <div class="fx-row">
+              <span class="fx-currency" id="fxToCur">🇷🇺 RUB</span>
+              <div>
+                <div class="fx-converted-big" id="fxConverted">0.00</div>
+                <div class="fx-rate" id="fxRate">1 INR = 1.08 RUB</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TOKEN FLOW EXPLANATION -->
+          <div class="token-flow" id="tokenFlowInfo">
+            <strong>🪙 How Token Wallet Works:</strong><br>
+            Your INR → <span style="color:var(--token)">PayDesk Tokens (PDT)</span> → <span id="flowTarget">Rubles (RUB)</span><br>
+            ✅ No bank swift · ✅ Instant settlement · ✅ Low 0.5% fee
+          </div>
+
+          <div class="quick-row">
+            <button class="qa-chip" onclick="document.getElementById('g_inr').value=1000;calcFX()">₹1K</button>
+            <button class="qa-chip" onclick="document.getElementById('g_inr').value=5000;calcFX()">₹5K</button>
+            <button class="qa-chip" onclick="document.getElementById('g_inr').value=10000;calcFX()">₹10K</button>
+            <button class="qa-chip" onclick="document.getElementById('g_inr').value=25000;calcFX()">₹25K</button>
+            <button class="qa-chip" onclick="document.getElementById('g_inr').value=50000;calcFX()">₹50K</button>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Note / Purpose</label>
+            <input class="form-input" id="g_note" placeholder="eg: Business payment, Gift etc">
+          </div>
+          <button class="pay-btn btn-token" onclick="initSend('global')">🪙 Send via Token Wallet →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ RECEIVE ═══ -->
+    <div class="tab-view" id="tab-receive">
+      <div class="section-title">Receive Money</div>
+      <div class="recv-grid">
+        <!-- UPI QR -->
+        <div class="card">
+          <div class="section-title" style="font-size:.88rem">📱 UPI / India</div>
+          <div class="qr-wrap">
+            <svg class="qr-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="200" height="200" fill="white"/>
+              <rect x="10" y="10" width="60" height="60" fill="none" stroke="#000" stroke-width="6"/>
+              <rect x="20" y="20" width="40" height="40" fill="none" stroke="#000" stroke-width="4"/>
+              <rect x="30" y="30" width="20" height="20" fill="#000"/>
+              <rect x="130" y="10" width="60" height="60" fill="none" stroke="#000" stroke-width="6"/>
+              <rect x="140" y="20" width="40" height="40" fill="none" stroke="#000" stroke-width="4"/>
+              <rect x="150" y="30" width="20" height="20" fill="#000"/>
+              <rect x="10" y="130" width="60" height="60" fill="none" stroke="#000" stroke-width="6"/>
+              <rect x="20" y="140" width="40" height="40" fill="none" stroke="#000" stroke-width="4"/>
+              <rect x="30" y="150" width="20" height="20" fill="#000"/>
+              <rect x="80" y="10" width="8" height="8" fill="#000"/><rect x="96" y="10" width="8" height="8" fill="#000"/>
+              <rect x="112" y="10" width="8" height="8" fill="#000"/><rect x="80" y="26" width="8" height="8" fill="#000"/>
+              <rect x="104" y="26" width="8" height="8" fill="#000"/><rect x="80" y="42" width="8" height="8" fill="#000"/>
+              <rect x="96" y="42" width="8" height="8" fill="#000"/><rect x="112" y="42" width="8" height="8" fill="#000"/>
+              <rect x="10" y="80" width="8" height="8" fill="#000"/><rect x="26" y="80" width="8" height="8" fill="#000"/>
+              <rect x="42" y="80" width="8" height="8" fill="#000"/><rect x="58" y="80" width="8" height="8" fill="#000"/>
+              <rect x="80" y="80" width="8" height="8" fill="#000"/><rect x="96" y="80" width="8" height="8" fill="#000"/>
+              <rect x="112" y="80" width="8" height="8" fill="#000"/><rect x="128" y="80" width="8" height="8" fill="#000"/>
+              <rect x="144" y="80" width="8" height="8" fill="#000"/><rect x="160" y="80" width="8" height="8" fill="#000"/>
+              <rect x="176" y="80" width="8" height="8" fill="#000"/>
+              <rect x="10" y="96" width="8" height="8" fill="#000"/><rect x="42" y="96" width="8" height="8" fill="#000"/>
+              <rect x="80" y="96" width="8" height="8" fill="#000"/><rect x="104" y="96" width="8" height="8" fill="#000"/>
+              <rect x="128" y="96" width="8" height="8" fill="#000"/><rect x="160" y="96" width="8" height="8" fill="#000"/>
+              <rect x="26" y="112" width="8" height="8" fill="#000"/><rect x="80" y="112" width="8" height="8" fill="#000"/>
+              <rect x="96" y="112" width="8" height="8" fill="#000"/><rect x="144" y="112" width="8" height="8" fill="#000"/>
+              <rect x="80" y="128" width="8" height="8" fill="#000"/><rect x="112" y="128" width="8" height="8" fill="#000"/>
+              <rect x="144" y="128" width="8" height="8" fill="#000"/><rect x="160" y="128" width="8" height="8" fill="#000"/>
+              <rect x="96" y="144" width="8" height="8" fill="#000"/><rect x="128" y="144" width="8" height="8" fill="#000"/>
+              <rect x="80" y="160" width="8" height="8" fill="#000"/><rect x="112" y="160" width="8" height="8" fill="#000"/>
+              <rect x="144" y="160" width="8" height="8" fill="#000"/>
+              <rect x="85" y="85" width="30" height="30" rx="6" fill="#5b4fcf"/>
+              <text x="100" y="106" text-anchor="middle" fill="white" font-size="15" font-weight="bold" font-family="sans-serif">₹</text>
+            </svg>
+            <div class="upi-pill" id="recvUPI">mukund@paydesk</div>
+            <button class="copy-btn" onclick="copyUPI()">📋 Copy UPI ID</button>
+          </div>
+        </div>
+        <!-- GLOBAL RECEIVE -->
+        <div class="card">
+          <div class="section-title" style="font-size:.88rem">🌍 Global / Token Address</div>
+          <div class="qr-wrap">
+            <svg class="qr-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="200" height="200" fill="white"/>
+              <rect x="10" y="10" width="60" height="60" fill="none" stroke="#000" stroke-width="6"/>
+              <rect x="20" y="20" width="40" height="40" fill="none" stroke="#000" stroke-width="4"/>
+              <rect x="30" y="30" width="20" height="20" fill="#f59e0b"/>
+              <rect x="130" y="10" width="60" height="60" fill="none" stroke="#000" stroke-width="6"/>
+              <rect x="140" y="20" width="40" height="40" fill="none" stroke="#000" stroke-width="4"/>
+              <rect x="150" y="30" width="20" height="20" fill="#f59e0b"/>
+              <rect x="10" y="130" width="60" height="60" fill="none" stroke="#000" stroke-width="6"/>
+              <rect x="20" y="140" width="40" height="40" fill="none" stroke="#000" stroke-width="4"/>
+              <rect x="30" y="150" width="20" height="20" fill="#f59e0b"/>
+              <rect x="80" y="10" width="8" height="8" fill="#f59e0b"/><rect x="96" y="10" width="8" height="8" fill="#000"/>
+              <rect x="112" y="10" width="8" height="8" fill="#f59e0b"/><rect x="80" y="26" width="8" height="8" fill="#000"/>
+              <rect x="104" y="26" width="8" height="8" fill="#f59e0b"/><rect x="80" y="42" width="8" height="8" fill="#f59e0b"/>
+              <rect x="10" y="80" width="8" height="8" fill="#000"/><rect x="42" y="80" width="8" height="8" fill="#f59e0b"/>
+              <rect x="80" y="80" width="8" height="8" fill="#000"/><rect x="96" y="80" width="8" height="8" fill="#f59e0b"/>
+              <rect x="128" y="80" width="8" height="8" fill="#000"/><rect x="160" y="80" width="8" height="8" fill="#f59e0b"/>
+              <rect x="10" y="96" width="8" height="8" fill="#f59e0b"/><rect x="80" y="96" width="8" height="8" fill="#000"/>
+              <rect x="128" y="96" width="8" height="8" fill="#f59e0b"/><rect x="160" y="96" width="8" height="8" fill="#000"/>
+              <rect x="80" y="112" width="8" height="8" fill="#f59e0b"/><rect x="112" y="112" width="8" height="8" fill="#000"/>
+              <rect x="80" y="128" width="8" height="8" fill="#000"/><rect x="144" y="128" width="8" height="8" fill="#f59e0b"/>
+              <rect x="96" y="144" width="8" height="8" fill="#000"/><rect x="128" y="144" width="8" height="8" fill="#f59e0b"/>
+              <rect x="80" y="160" width="8" height="8" fill="#f59e0b"/><rect x="112" y="160" width="8" height="8" fill="#000"/>
+              <rect x="85" y="85" width="30" height="30" rx="6" fill="#f59e0b"/>
+              <text x="100" y="106" text-anchor="middle" fill="white" font-size="13" font-weight="bold" font-family="sans-serif">PDT</text>
+            </svg>
+            <div class="upi-pill" style="background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.2);color:rgba(245,158,11,.8)" id="recvToken">PDT:mukund.paydesk.global</div>
+            <button class="copy-btn" onclick="copyToken()">📋 Copy Token Address</button>
+          </div>
+          <div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:9px;padding:10px 12px;font-size:.75rem;color:rgba(245,158,11,.6);margin-top:8px;line-height:1.5;">
+            🌍 Share this address with anyone worldwide. They can send in their local currency — you'll receive in PDT tokens, auto-convertible to INR.
+          </div>
+        </div>
+      </div>
+
+      <!-- REQUEST MONEY -->
+      <div class="card" style="margin-top:18px">
+        <div class="section-title" style="font-size:.88rem">📨 Request Payment</div>
+        <div class="grid2">
+          <div>
+            <div class="form-group">
+              <label class="form-label">Request From (UPI / Token Address)</label>
+              <input class="form-input" id="req_from" placeholder="friend@okaxis or PDT:address">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Amount (₹)</label>
+              <input class="form-input" id="req_amt" type="number" placeholder="0.00">
+            </div>
+          </div>
+          <div>
+            <div class="form-group">
+              <label class="form-label">Note</label>
+              <input class="form-input" id="req_note" placeholder="Reason for request">
+            </div>
+            <button class="pay-btn btn-green" style="margin-top:22px" onclick="initRequest()">Send Request →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TOKEN WALLET ═══ -->
+    <div class="tab-view" id="tab-token">
+      <div class="token-header">
+        <div class="w-label">🪙 PayDesk Token (PDT) Balance</div>
+        <div class="token-big-bal" id="tokenBigBal">2,450 PDT</div>
+        <div class="token-inr-eq" id="tokenBigInr">≈ ₹2,450 · $29.4 · €27.1 · ₽2,646</div>
+        <div class="token-actions">
+          <div class="ta-btn" onclick="openAddToken()">➕ Add Tokens</div>
+          <div class="ta-btn" onclick="openConvert()">🔄 Convert to INR</div>
+        </div>
+      </div>
+
+      <!-- QUICK CONVERTERS -->
+      <div class="section-title">⚡ Quick Converters</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;" id="quickConvGrid">
+
+        <!-- INR → RUB -->
+        <div style="background:linear-gradient(135deg,rgba(239,68,68,.12),rgba(239,68,68,.04));border:1px solid rgba(239,68,68,.25);border-radius:16px;padding:18px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+            <span style="font-size:1.3rem">🇷🇺</span>
+            <div>
+              <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;">INR → RUB</div>
+              <div style="font-size:.68rem;color:var(--text3);">Russian Ruble · Live Rate</div>
+            </div>
+          </div>
+          <label class="form-label">Enter INR Amount</label>
+          <input class="form-input" id="qc_rub_inr" type="number" placeholder="₹ Amount" oninput="calcQuick('RUB')" style="margin-bottom:10px;">
+          <div style="background:rgba(0,0,0,.25);border-radius:9px;padding:10px 12px;">
+            <div style="font-size:.68rem;color:var(--text3);margin-bottom:3px;">You get (₽ Rubles)</div>
+            <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:#fca5a5;" id="qc_rub_out">₽ 0.00</div>
+            <div style="font-size:.67rem;color:var(--text3);margin-top:3px;" id="qc_rub_rate">1 INR = ₽1.08</div>
+          </div>
+          <button style="width:100%;margin-top:10px;background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.35);color:#fca5a5;padding:9px;border-radius:9px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;transition:all .2s;" onmouseover="this.style.background='rgba(239,68,68,.3)'" onmouseout="this.style.background='rgba(239,68,68,.2)'" onclick="sendQuick('RUB')">Send to Russia →</button>
+        </div>
+
+        <!-- INR → USD -->
+        <div style="background:linear-gradient(135deg,rgba(56,189,248,.12),rgba(56,189,248,.04));border:1px solid rgba(56,189,248,.25);border-radius:16px;padding:18px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+            <span style="font-size:1.3rem">🇺🇸</span>
+            <div>
+              <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;">INR → USD</div>
+              <div style="font-size:.68rem;color:var(--text3);">US Dollar · Live Rate</div>
+            </div>
+          </div>
+          <label class="form-label">Enter INR Amount</label>
+          <input class="form-input" id="qc_usd_inr" type="number" placeholder="₹ Amount" oninput="calcQuick('USD')" style="margin-bottom:10px;">
+          <div style="background:rgba(0,0,0,.25);border-radius:9px;padding:10px 12px;">
+            <div style="font-size:.68rem;color:var(--text3);margin-bottom:3px;">You get ($ Dollars)</div>
+            <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:#7dd3fc;" id="qc_usd_out">$ 0.00</div>
+            <div style="font-size:.67rem;color:var(--text3);margin-top:3px;" id="qc_usd_rate">1 INR = $0.012</div>
+          </div>
+          <button style="width:100%;margin-top:10px;background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.3);color:#7dd3fc;padding:9px;border-radius:9px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;transition:all .2s;" onmouseover="this.style.background='rgba(56,189,248,.25)'" onmouseout="this.style.background='rgba(56,189,248,.15)'" onclick="sendQuick('USD')">Send to USA →</button>
+        </div>
+      </div>
+
+      <!-- ADD TOKEN FROM INR -->
+      <div style="background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(245,158,11,.05));border:1px solid rgba(245,158,11,.28);border-radius:16px;padding:20px;margin-bottom:18px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+          <span style="font-size:1.3rem">🪙</span>
+          <div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;color:var(--token);">Add Tokens from INR</div>
+            <div style="font-size:.7rem;color:rgba(245,158,11,.5);">Convert your INR balance to PDT Tokens · 1 INR = 1 PDT</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;">
+          <div>
+            <label class="form-label">INR Amount</label>
+            <input class="form-input" id="inline_add_inr" type="number" placeholder="₹ Amount" oninput="calcInlineAdd()" style="border-color:rgba(245,158,11,.25);">
+          </div>
+          <div>
+            <label class="form-label">Tokens You Get</label>
+            <div style="background:rgba(0,0,0,.3);border:1px solid rgba(245,158,11,.2);border-radius:9px;padding:11px 14px;font-family:'Syne',sans-serif;font-weight:700;color:var(--token);font-size:.95rem;" id="inline_add_out">0 PDT</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
+          <button class="qa-chip" onclick="document.getElementById('inline_add_inr').value=500;calcInlineAdd()">₹500</button>
+          <button class="qa-chip" onclick="document.getElementById('inline_add_inr').value=1000;calcInlineAdd()">₹1K</button>
+          <button class="qa-chip" onclick="document.getElementById('inline_add_inr').value=5000;calcInlineAdd()">₹5K</button>
+          <button class="qa-chip" onclick="document.getElementById('inline_add_inr').value=10000;calcInlineAdd()">₹10K</button>
+        </div>
+        <button style="width:100%;margin-top:12px;background:linear-gradient(135deg,#d97706,#f59e0b);color:#1a0e00;border:none;padding:12px;border-radius:10px;font-size:.88rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;box-shadow:0 0 16px rgba(245,158,11,.25);" onclick="addTokensInline()">➕ Add Tokens to Wallet →</button>
+      </div>
+
+      <!-- LIVE RATES -->
+      <div class="section-title">🌍 Supported Currencies & Live Rates</div>
+      <div class="curr-grid" id="currGrid"></div>
+
+      <!-- HOW IT WORKS -->
+      <div class="card" style="margin-bottom:18px">
+        <div class="section-title" style="font-size:.88rem">⚙️ How Token Wallet Works</div>
+        <div class="flow-steps">
+          <div class="step"><div class="step-num">1</div><div><strong>Top Up:</strong> Add INR to your PayDesk Token (PDT) wallet. 1 PDT = ₹1.</div></div>
+          <div class="step"><div class="step-num">2</div><div><strong>Global Send:</strong> When you send money abroad, PayDesk converts PDT → Local Currency at live FX rate.</div></div>
+          <div class="step"><div class="step-num">3</div><div><strong>Recipient Gets:</strong> Person in Russia gets Rubles, UAE gets Dirhams, USA gets Dollars — instantly.</div></div>
+          <div class="step"><div class="step-num">4</div><div><strong>Fee:</strong> Only 0.5% conversion fee. No SWIFT. No hidden charges.</div></div>
+        </div>
+      </div>
+
+      <!-- TOKEN TX HISTORY -->
+      <div class="section-title">Token Transactions</div>
+      <div class="tx-card"><div id="tokenTxList"><div style="padding:32px 0;text-align:center;color:var(--text3);font-size:.82rem">No token transactions yet</div></div></div>
+    </div>
+
+    <!-- ═══ HISTORY ═══ -->
+    <div class="tab-view" id="tab-history">
+      <div class="section-title">Transaction History</div>
+      <div class="hist-filters">
+        <button class="hf on" onclick="filterH('all',this)">All</button>
+        <button class="hf" onclick="filterH('sent',this)">Sent</button>
+        <button class="hf" onclick="filterH('received',this)">Received</button>
+        <button class="hf" onclick="filterH('global',this)">🌍 Global</button>
+        <button class="hf" onclick="filterH('pending',this)">Pending</button>
+      </div>
+      <div class="tx-card"><div id="histList"><div style="padding:40px 0;text-align:center;color:var(--text3);font-size:.82rem">No transactions yet</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="overlay" id="confirmOverlay">
+  <div class="modal">
+    <div class="modal-icon" id="mIcon">🔐</div>
+    <div class="modal-title" id="mTitle">Confirm Payment</div>
+    <div class="modal-sub" id="mSub">Review details and enter your PIN</div>
+    <div class="detail-box">
+      <div class="detail-row"><span class="dk">To</span><span class="dv" id="mTo">—</span></div>
+      <div class="detail-row"><span class="dk">Amount</span><span class="dv big" id="mAmt">—</span></div>
+      <div class="detail-row" id="mConvRow" style="display:none"><span class="dk">Recipient Gets</span><span class="dv token" id="mConv">—</span></div>
+      <div class="detail-row" id="mTokenRow" style="display:none"><span class="dk">Tokens Used</span><span class="dv token" id="mToken">—</span></div>
+      <div class="detail-row"><span class="dk">Note</span><span class="dv" id="mNote">—</span></div>
+      <div class="detail-row"><span class="dk">Fee</span><span class="dv green" id="mFee">Free</span></div>
+    </div>
+    <!-- GLOBAL FLOW STEPS -->
+    <div class="flow-steps" id="mFlowSteps" style="display:none">
+      <div class="step"><div class="step-num">1</div><div>INR deducted from your wallet</div></div>
+      <div class="step"><div class="step-num">2</div><div>Converted to PDT tokens internally</div></div>
+      <div class="step"><div class="step-num">3</div><div id="mFlowStep3">PDT → local currency at live rate</div></div>
+      <div class="step"><div class="step-num">4</div><div>Recipient credited instantly</div></div>
+    </div>
+    <label class="form-label" style="text-align:center">Enter PIN</label>
+    <div class="pin-group">
+      <input class="pin-dot" type="password" maxlength="1" id="p1" oninput="pn(this,'p2')">
+      <input class="pin-dot" type="password" maxlength="1" id="p2" oninput="pn(this,'p3')">
+      <input class="pin-dot" type="password" maxlength="1" id="p3" oninput="pn(this,'p4')">
+      <input class="pin-dot" type="password" maxlength="1" id="p4">
+    </div>
+    <div class="modal-btns">
+      <button class="m-cancel" onclick="closeOverlay('confirmOverlay')">Cancel</button>
+      <button class="m-confirm" id="mConfirmBtn" onclick="processPayment()">Confirm →</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT MODAL -->
+<div class="overlay" id="resultOverlay">
+  <div class="modal" style="text-align:center">
+    <div class="result-anim" id="rAnim">✅</div>
+    <div class="modal-title" id="rTitle">Payment Sent!</div>
+    <div class="modal-sub" id="rSub">Transaction complete</div>
+    <div class="receipt" id="rReceipt"></div>
+    <div class="r-id" id="rId"></div>
+    <button class="done-btn done-green" onclick="closeResult()">Done ✓</button>
+  </div>
+</div>
+
+<!-- ADD TOKEN MODAL -->
+<div class="overlay" id="addTokenOverlay">
+  <div class="modal">
+    <div class="modal-icon">🪙</div>
+    <div class="modal-title">Add Tokens (PDT)</div>
+    <div class="modal-sub">Top up your global token wallet from INR balance</div>
+    <div class="form-group">
+      <label class="form-label">INR Amount to Convert</label>
+      <input class="form-input" id="at_amt" type="number" placeholder="eg: 5000" oninput="calcAddToken()">
+    </div>
+    <div class="token-calc" id="atCalc">
+      <div class="token-calc-row"><span>INR Amount</span><span id="atInr">₹0</span></div>
+      <div class="token-calc-row"><span>Conversion Rate</span><span>1:1</span></div>
+      <div class="token-calc-row"><span>Fee (0%)</span><span>₹0</span></div>
+      <div class="token-calc-row total"><span>Tokens Received</span><span id="atTokens">0 PDT</span></div>
+    </div>
+    <div class="modal-btns">
+      <button class="m-cancel" onclick="closeOverlay('addTokenOverlay')">Cancel</button>
+      <button class="m-confirm m-token-confirm" style="background:linear-gradient(135deg,#d97706,#f59e0b);color:#1a0e00" onclick="addTokens()">Add Tokens →</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONVERT TOKEN MODAL -->
+<div class="overlay" id="convertOverlay">
+  <div class="modal">
+    <div class="modal-icon">🔄</div>
+    <div class="modal-title">Convert PDT → INR</div>
+    <div class="modal-sub">Withdraw tokens back to your INR wallet</div>
+    <div class="form-group">
+      <label class="form-label">PDT Tokens to Convert</label>
+      <input class="form-input" id="cv_amt" type="number" placeholder="eg: 1000" oninput="calcConvert()">
+    </div>
+    <div class="token-calc" id="cvCalc">
+      <div class="token-calc-row"><span>Tokens</span><span id="cvTokens">0 PDT</span></div>
+      <div class="token-calc-row"><span>Rate</span><span>1:1</span></div>
+      <div class="token-calc-row total"><span>INR Received</span><span id="cvInr">₹0</span></div>
+    </div>
+    <div class="modal-btns">
+      <button class="m-cancel" onclick="closeOverlay('convertOverlay')">Cancel</button>
+      <button class="m-confirm" onclick="convertTokens()">Convert →</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span id="tIcon">✅</span><span id="tMsg">Done</span></div>
+
+<script>
+/* ════ DATA ════ */
+const RATES = {
+  RUB:{ name:'Russia',   flag:'🇷🇺', sym:'₽', rate:1.08,  full:'Russian Ruble' },
+  USD:{ name:'USA',      flag:'🇺🇸', sym:'$', rate:0.012, full:'US Dollar' },
+  AED:{ name:'UAE',      flag:'🇦🇪', sym:'د.إ',rate:0.044,full:'UAE Dirham' },
+  EUR:{ name:'Europe',   flag:'🇪🇺', sym:'€', rate:0.011, full:'Euro' },
+  GBP:{ name:'UK',       flag:'🇬🇧', sym:'£', rate:0.0096,full:'British Pound' },
+  SGD:{ name:'Singapore',flag:'🇸🇬', sym:'S$',rate:0.016, full:'Singapore Dollar' },
+  JPY:{ name:'Japan',    flag:'🇯🇵', sym:'¥', rate:1.82,  full:'Japanese Yen' },
+  CAD:{ name:'Canada',   flag:'🇨🇦', sym:'CA$',rate:0.016,full:'Canadian Dollar' },
+};
+
+const USERS = {
+  mukund:{ pass:'paydesk123', name:'Mukund Saraswat', upi:'mukund@paydesk', bal:245000, tokens:2450, pin:'1234' },
+};
+
+let U = null;
+let txList = [];
+let tokenTxList = [];
+let pendTx = null;
+let selCountry = 'RUB';
+
+/* ════ LOGIN ════ */
+function doLogin(){
+  const u = document.getElementById('loginUser').value.trim().toLowerCase();
+  const p = document.getElementById('loginPass').value;
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('loginErr');
+  btn.disabled=true; btn.textContent='Signing in…'; err.style.display='none';
+  setTimeout(()=>{
+    if(USERS[u]&&USERS[u].pass===p){
+      U = {...USERS[u], username:u};
+      document.getElementById('loginScreen').classList.remove('active');
+      document.getElementById('appScreen').classList.add('active');
+      document.getElementById('tbAv').textContent = U.name[0];
+      document.getElementById('tbNm').textContent = U.name.split(' ')[0];
+      document.getElementById('homeUPI').textContent = U.upi;
+      document.getElementById('recvUPI').textContent = U.upi;
+      document.getElementById('recvToken').textContent = 'PDT:'+U.username+'.paydesk.global';
+      initRateTicker();
+      buildCountryGrid();
+      buildCurrGrid();
+      updateBals();
+      // Simulate incoming after 8s
+      setTimeout(simulateIncoming, 8000);
+    } else {
+      err.style.display='block';
+      btn.disabled=false; btn.textContent='Sign In →';
+    }
+  },900);
+}
+document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('loginUser').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('loginPass').focus();});
+
+function doLogout(){
+  U=null; txList=[]; tokenTxList=[]; pendTx=null;
+  document.getElementById('appScreen').classList.remove('active');
+  document.getElementById('loginScreen').classList.add('active');
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+  document.getElementById('loginErr').style.display='none';
+  document.getElementById('loginBtn').disabled=false;
+  document.getElementById('loginBtn').textContent='Sign In →';
+}
+
+/* ════ TABS ════ */
+function showTab(id, btn){
+  document.querySelectorAll('.tab-view').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.tb-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('tab-'+id).classList.add('on');
+  btn.classList.add('on');
+  if(id==='history') renderHist('all');
+  if(id==='token') renderTokenTx();
+  window.scrollTo(0,0);
+}
+
+/* ════ SEND TYPE ════ */
+function setSendType(type){
+  document.querySelectorAll('.stt-btn').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.send-section').forEach(s=>s.classList.remove('on'));
+  document.getElementById('stt'+type.charAt(0).toUpperCase()+type.slice(1)).classList.add('on');
+  document.getElementById('send'+type.charAt(0).toUpperCase()+type.slice(1)).classList.add('on');
+}
+
+/* ════ RATE TICKER ════ */
+function initRateTicker(){
+  const el = document.getElementById('rateTicker');
+  el.innerHTML = Object.entries(RATES).map(([k,v])=>`
+    <div class="rate-pill">
+      <span class="rate-flag">${v.flag}</span>
+      <div>
+        <div class="rate-text">${k}/INR</div>
+        <div class="rate-val">${v.sym}${v.rate}</div>
+      </div>
+      <div class="rate-chg" style="color:var(--green)">▲ Live</div>
+    </div>`).join('');
+  // Slight rate fluctuation every 5s
+  setInterval(()=>{
+    Object.keys(RATES).forEach(k=>{
+      RATES[k].rate = +(RATES[k].rate * (1 + (Math.random()-.5)*0.002)).toFixed(6);
+    });
+    el.innerHTML = Object.entries(RATES).map(([k,v])=>`
+      <div class="rate-pill">
+        <span class="rate-flag">${v.flag}</span>
+        <div><div class="rate-text">${k}/INR</div><div class="rate-val">${v.sym}${v.rate.toFixed(4)}</div></div>
+        <div class="rate-chg" style="color:var(--green)">▲</div>
+      </div>`).join('');
+    if(document.getElementById('g_inr').value) calcFX();
+  }, 5000);
+}
+
+/* ════ COUNTRY GRID ════ */
+function buildCountryGrid(){
+  const el = document.getElementById('countryGrid');
+  el.innerHTML = Object.entries(RATES).map(([k,v])=>`
+    <div class="country-btn ${k===selCountry?'sel':''}" onclick="selectCountry('${k}')">
+      <span class="country-flag">${v.flag}</span>
+      <span class="country-name">${v.name}</span>
+    </div>`).join('');
+}
+
+function selectCountry(k){
+  selCountry = k;
+  buildCountryGrid();
+  const r = RATES[k];
+  document.getElementById('fxToCur').textContent = r.flag+' '+k;
+  document.getElementById('flowTarget').textContent = r.full+' ('+k+')';
+  document.getElementById('tokenFlowInfo').innerHTML = `<strong>🪙 How Token Wallet Works:</strong><br>
+    Your INR → <span style="color:var(--token)">PayDesk Tokens (PDT)</span> → <span style="color:#86efac">${r.full} (${k})</span><br>
+    ✅ No bank SWIFT &nbsp;·&nbsp; ✅ Instant settlement &nbsp;·&nbsp; ✅ Only 0.5% fee`;
+  calcFX();
+}
+
+/* ════ FX CALC ════ */
+function calcFX(){
+  const inr = parseFloat(document.getElementById('g_inr').value)||0;
+  const r = RATES[selCountry];
+  const conv = (inr * r.rate * 0.995).toFixed(2); // 0.5% fee
+  document.getElementById('fxConverted').textContent = r.sym+Number(conv).toLocaleString();
+  document.getElementById('fxRate').textContent = `1 INR = ${r.sym}${r.rate.toFixed(4)} · Fee: 0.5%`;
+}
+
+/* ════ CURRENCY GRID (TOKEN TAB) ════ */
+function buildCurrGrid(){
+  const el = document.getElementById('currGrid');
+  el.innerHTML = Object.entries(RATES).map(([k,v])=>`
+    <div class="curr-card">
+      <div class="curr-flag">${v.flag}</div>
+      <div class="curr-name">${v.full}</div>
+      <div class="curr-rate">1 INR = ${v.sym}${v.rate.toFixed(4)}</div>
+      <div class="curr-symbol">${k}</div>
+    </div>`).join('');
+}
+
+/* ════ BALANCES ════ */
+function updateBals(){
+  const fmt = n=>n.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('inrBal').textContent = '₹'+fmt(U.bal);
+  document.getElementById('tokenBal').textContent = U.tokens.toLocaleString()+' PDT';
+  document.getElementById('tokenBigBal').textContent = U.tokens.toLocaleString()+' PDT';
+  document.getElementById('tokenInrEq').textContent = `≈ ₹${U.tokens.toLocaleString()} (1 PDT = ₹1)`;
+  const r = RATES;
+  document.getElementById('tokenBigInr').textContent =
+    `≈ ₹${U.tokens.toLocaleString()} · $${(U.tokens*r.USD.rate).toFixed(1)} · €${(U.tokens*r.EUR.rate).toFixed(1)} · ₽${(U.tokens*r.RUB.rate).toFixed(0)}`;
+}
+
+/* ════ STATS ════ */
+function updateStats(){
+  const sent = txList.filter(t=>t.type==='sent'||t.type==='global').reduce((a,t)=>a+t.inr,0);
+  const recv = txList.filter(t=>t.type==='received').reduce((a,t)=>a+t.inr,0);
+  document.getElementById('statSent').textContent = '₹'+sent.toLocaleString('en-IN');
+  document.getElementById('statRecv').textContent = '₹'+recv.toLocaleString('en-IN');
+  document.getElementById('statCnt').textContent = txList.length;
+}
+
+/* ════ INIT SEND ════ */
+function initSend(type){
+  if(type==='india'){
+    const vpa = document.getElementById('s_vpa').value.trim();
+    const amt = parseFloat(document.getElementById('s_amt').value);
+    const note = document.getElementById('s_note').value.trim()||'Payment';
+    if(!vpa){ toast('⚠️','Enter UPI ID','rgba(240,180,41,.12)','rgba(240,180,41,.3)'); return; }
+    if(!amt||amt<1){ toast('⚠️','Enter valid amount','rgba(240,180,41,.12)','rgba(240,180,41,.3)'); return; }
+    if(amt>U.bal){ toast('❌','Insufficient INR balance','rgba(239,68,68,.1)','rgba(239,68,68,.3)'); return; }
+    pendTx = { type:'india', vpa, inr:amt, note, fee:'Free' };
+    document.getElementById('mIcon').textContent='💸';
+    document.getElementById('mTitle').textContent='Confirm UPI Payment';
+    document.getElementById('mSub').textContent='Sending via UPI';
+    document.getElementById('mTo').textContent=vpa;
+    document.getElementById('mAmt').textContent='₹'+amt.toLocaleString('en-IN');
+    document.getElementById('mNote').textContent=note;
+    document.getElementById('mFee').textContent='Free';
+    document.getElementById('mConvRow').style.display='none';
+    document.getElementById('mTokenRow').style.display='none';
+    document.getElementById('mFlowSteps').style.display='none';
+    document.getElementById('mConfirmBtn').className='m-confirm';
+  } else {
+    const recip = document.getElementById('g_recip').value.trim();
+    const inr   = parseFloat(document.getElementById('g_inr').value);
+    const note  = document.getElementById('g_note').value.trim()||'Global Payment';
+    if(!recip){ toast('⚠️','Enter recipient details','rgba(240,180,41,.12)','rgba(240,180,41,.3)'); return; }
+    if(!inr||inr<1){ toast('⚠️','Enter amount','rgba(240,180,41,.12)','rgba(240,180,41,.3)'); return; }
+    if(inr>U.bal){ toast('❌','Insufficient INR balance','rgba(239,68,68,.1)','rgba(239,68,68,.3)'); return; }
+    const r = RATES[selCountry];
+    const converted = (inr * r.rate * 0.995).toFixed(2);
+    const fee = (inr * 0.005).toFixed(2);
+    pendTx = { type:'global', vpa:recip, inr, note, fee:'₹'+fee, country:selCountry,
+      converted, convertedSym:r.sym, convertedCur:selCountry, flag:r.flag };
+    document.getElementById('mIcon').textContent='🌍';
+    document.getElementById('mTitle').textContent='Confirm Global Payment';
+    document.getElementById('mSub').textContent='Via Token Wallet · '+r.flag+' '+selCountry;
+    document.getElementById('mTo').textContent=recip;
+    document.getElementById('mAmt').textContent='₹'+inr.toLocaleString('en-IN');
+    document.getElementById('mNote').textContent=note;
+    document.getElementById('mFee').textContent='₹'+fee+' (0.5%)';
+    document.getElementById('mConvRow').style.display='flex';
+    document.getElementById('mConv').textContent=r.sym+Number(converted).toLocaleString()+' '+selCountry;
+    document.getElementById('mTokenRow').style.display='flex';
+    document.getElementById('mToken').textContent=inr+' PDT (internal)';
+    document.getElementById('mFlowSteps').style.display='block';
+    document.getElementById('mFlowStep3').textContent=`${inr} PDT → ${r.sym}${Number(converted).toLocaleString()} ${selCountry}`;
+    document.getElementById('mConfirmBtn').className='m-confirm m-token-confirm';
+    document.getElementById('mConfirmBtn').style.background='linear-gradient(135deg,#d97706,#f59e0b)';
+    document.getElementById('mConfirmBtn').style.color='#1a0e00';
+  }
+  clearPins();
+  openOverlay('confirmOverlay');
+  setTimeout(()=>document.getElementById('p1').focus(),300);
+}
+
+/* ════ REQUEST ════ */
+function initRequest(){
+  const from = document.getElementById('req_from').value.trim();
+  const amt  = parseFloat(document.getElementById('req_amt').value);
+  const note = document.getElementById('req_note').value.trim()||'Payment Request';
+  if(!from||!amt||amt<1){ toast('⚠️','Fill all fields','rgba(240,180,41,.12)','rgba(240,180,41,.3)'); return; }
+  pendTx = { type:'request', vpa:from, inr:amt, note, fee:'Free' };
+  document.getElementById('mIcon').textContent='📨';
+  document.getElementById('mTitle').textContent='Confirm Request';
+  document.getElementById('mSub').textContent='Send payment request';
+  document.getElementById('mTo').textContent=from;
+  document.getElementById('mAmt').textContent='₹'+amt.toLocaleString('en-IN');
+  document.getElementById('mNote').textContent=note;
+  document.getElementById('mFee').textContent='Free';
+  document.getElementById('mConvRow').style.display='none';
+  document.getElementById('mTokenRow').style.display='none';
+  document.getElementById('mFlowSteps').style.display='none';
+  document.getElementById('mConfirmBtn').className='m-confirm';
+  document.getElementById('mConfirmBtn').style.background='';
+  document.getElementById('mConfirmBtn').style.color='';
+  clearPins();
+  openOverlay('confirmOverlay');
+  setTimeout(()=>document.getElementById('p1').focus(),300);
+}
+
+/* ════ PIN ════ */
+function pn(el,nxt){ if(el.value.length===1) document.getElementById(nxt).focus(); }
+function clearPins(){ ['p1','p2','p3','p4'].forEach(id=>document.getElementById(id).value=''); }
+
+/* ════ PROCESS ════ */
+function processPayment(){
+  const pin = ['p1','p2','p3','p4'].map(id=>document.getElementById(id).value).join('');
+  if(pin.length<4){ toast('⚠️','Enter all 4 PIN digits','rgba(240,180,41,.12)','rgba(240,180,41,.3)'); return; }
+  if(pin!==U.pin){
+    toast('❌','Wrong PIN — try 1234','rgba(239,68,68,.1)','rgba(239,68,68,.3)');
+    clearPins(); document.getElementById('p1').focus(); return;
+  }
+  closeOverlay('confirmOverlay');
+  const txId = 'PD'+Date.now().toString().slice(-8);
+  const now = new Date();
+
+  if(pendTx.type==='india'){
+    U.bal -= pendTx.inr;
+    const tx = { id:txId, type:'sent', vpa:pendTx.vpa, inr:pendTx.inr, note:pendTx.note, time:now, status:'success' };
+    txList.unshift(tx);
+    updateBals(); updateStats(); renderRecent();
+    showResult({anim:'✅',title:'Payment Sent!',sub:'Sent to '+pendTx.vpa,
+      rows:[['To',pendTx.vpa],['Amount','₹'+pendTx.inr.toLocaleString('en-IN')],['Note',pendTx.note],['Status','✅ Success']],id:txId,time:now});
+    document.getElementById('s_vpa').value='';
+    document.getElementById('s_amt').value='';
+    document.getElementById('s_note').value='';
+
+  } else if(pendTx.type==='global'){
+    U.bal -= pendTx.inr;
+    // Token wallet deduction (internal) — tokens stay as global liquidity pool
+    const tx = { id:txId, type:'global', vpa:pendTx.vpa, inr:pendTx.inr, note:pendTx.note, time:now,
+      status:'success', country:pendTx.country, flag:pendTx.flag,
+      converted:pendTx.converted, convertedSym:pendTx.convertedSym, convertedCur:pendTx.convertedCur };
+    txList.unshift(tx);
+    tokenTxList.unshift({ id:txId, desc:'Global Send to '+pendTx.vpa, tokens:pendTx.inr, type:'used', time:now });
+    updateBals(); updateStats(); renderRecent(); renderTokenTx();
+    showResult({anim:'🌍',title:'Global Payment Sent!',sub:'Recipient gets '+pendTx.flag+' '+pendTx.convertedSym+Number(pendTx.converted).toLocaleString()+' '+pendTx.convertedCur,
+      rows:[['To',pendTx.vpa],['INR Sent','₹'+pendTx.inr.toLocaleString('en-IN')],['Recipient Gets',pendTx.convertedSym+Number(pendTx.converted).toLocaleString()+' '+pendTx.convertedCur],
+            ['Token Route','INR → PDT → '+pendTx.convertedCur],['Fee','₹'+(pendTx.inr*0.005).toFixed(2)],['Status','✅ Instant']],id:txId,time:now});
+    document.getElementById('g_recip').value='';
+    document.getElementById('g_inr').value='';
+    document.getElementById('g_note').value='';
+    document.getElementById('fxConverted').textContent='0.00';
+
+  } else if(pendTx.type==='request'){
+    const tx = { id:txId, type:'requested', vpa:pendTx.vpa, inr:pendTx.inr, note:pendTx.note, time:now, status:'pending' };
+    txList.unshift(tx);
+    updateStats(); renderRecent();
+    showResult({anim:'📨',title:'Request Sent!',sub:'Request sent to '+pendTx.vpa,
+      rows:[['To',pendTx.vpa],['Amount','₹'+pendTx.inr.toLocaleString('en-IN')],['Note',pendTx.note],['Status','⏳ Pending']],id:txId,time:now});
+    document.getElementById('req_from').value='';
+    document.getElementById('req_amt').value='';
+    document.getElementById('req_note').value='';
+  }
+}
+
+/* ════ RESULT ════ */
+function showResult({anim,title,sub,rows,id,time}){
+  document.getElementById('rAnim').textContent=anim;
+  document.getElementById('rTitle').textContent=title;
+  document.getElementById('rSub').textContent=sub;
+  document.getElementById('rReceipt').innerHTML=rows.map(([k,v])=>`<div class="r-row"><span class="r-key">${k}</span><span class="r-val">${v}</span></div>`).join('');
+  document.getElementById('rId').textContent='Ref: '+id+' · '+time.toLocaleTimeString();
+  openOverlay('resultOverlay');
+}
+function closeResult(){
+  closeOverlay('resultOverlay');
+  showTab('home',document.querySelectorAll('.tb-btn')[0]);
+}
+
+/* ════ ADD TOKENS ════ */
+function openAddToken(){ document.getElementById('at_amt').value=''; calcAddToken(); openOverlay('addTokenOverlay'); }
+function calcAddToken(){
+  const v=parseFloat(document.getElementById('at_amt').value)||0;
+  document.getElementById('atInr').textContent='₹'+v.toLocaleString('en-IN');
+  document.getElementById('atTokens').textContent=v.toLocaleString()+' PDT';
+}
+function addTokens(){
+  const v=parseFloat(document.getElementById('at_amt').value)||0;
+  if(!v||v<1){toast('⚠️','Enter amount','rgba(240,180,41,.12)','rgba(240,180,41,.3)');return;}
+  if(v>U.bal){toast('❌','Insufficient INR balance','rgba(239,68,68,.1)','rgba(239,68,68,.3)');return;}
+  U.bal-=v; U.tokens+=v;
+  tokenTxList.unshift({id:'TK'+Date.now().toString().slice(-6),desc:'Added from INR wallet',tokens:v,type:'added',time:new Date()});
+  updateBals(); renderTokenTx();
+  closeOverlay('addTokenOverlay');
+  toast('🪙',v.toLocaleString()+' PDT added to Token Wallet','rgba(245,158,11,.12)','rgba(245,158,11,.3)');
+}
+
+/* ════ CONVERT TOKENS ════ */
+function openConvert(){ document.getElementById('cv_amt').value=''; calcConvert(); openOverlay('convertOverlay'); }
+function calcConvert(){
+  const v=parseFloat(document.getElementById('cv_amt').value)||0;
+  document.getElementById('cvTokens').textContent=v.toLocaleString()+' PDT';
+  document.getElementById('cvInr').textContent='₹'+v.toLocaleString('en-IN');
+}
+function convertTokens(){
+  const v=parseFloat(document.getElementById('cv_amt').value)||0;
+  if(!v||v<1){toast('⚠️','Enter tokens','rgba(240,180,41,.12)','rgba(240,180,41,.3)');return;}
+  if(v>U.tokens){toast('❌','Insufficient tokens','rgba(239,68,68,.1)','rgba(239,68,68,.3)');return;}
+  U.tokens-=v; U.bal+=v;
+  tokenTxList.unshift({id:'TK'+Date.now().toString().slice(-6),desc:'Converted to INR',tokens:v,type:'converted',time:new Date()});
+  updateBals(); renderTokenTx();
+  closeOverlay('convertOverlay');
+  toast('✅','₹'+v.toLocaleString('en-IN')+' added to INR wallet','rgba(34,197,94,.12)','rgba(34,197,94,.3)');
+}
+
+/* ════ QUICK CONVERTERS ════ */
+function calcQuick(cur){
+  const r=RATES[cur];
+  const inrId=cur==='RUB'?'qc_rub_inr':'qc_usd_inr';
+  const outId=cur==='RUB'?'qc_rub_out':'qc_usd_out';
+  const rateId=cur==='RUB'?'qc_rub_rate':'qc_usd_rate';
+  const inr=parseFloat(document.getElementById(inrId).value)||0;
+  const conv=(inr*r.rate*0.995).toFixed(2);
+  document.getElementById(outId).textContent=r.sym+Number(conv).toLocaleString();
+  document.getElementById(rateId).textContent='1 INR = '+r.sym+r.rate.toFixed(4)+' · Fee 0.5%';
+}
+function sendQuick(cur){
+  const inrId=cur==='RUB'?'qc_rub_inr':'qc_usd_inr';
+  const inr=parseFloat(document.getElementById(inrId).value)||0;
+  if(!inr||inr<1){toast('⚠️','Enter amount','rgba(240,180,41,.12)','rgba(240,180,41,.3)');return;}
+  document.getElementById('g_inr').value=inr;
+  selectCountry(cur);
+  showTab('send',document.querySelectorAll('.tb-btn')[1]);
+  setSendType('global');
+  calcFX();
+  toast('🌍','Amount set — fill recipient & send!','rgba(91,79,207,.15)','rgba(91,79,207,.3)');
+}
+function calcInlineAdd(){
+  const v=parseFloat(document.getElementById('inline_add_inr').value)||0;
+  document.getElementById('inline_add_out').textContent=v.toLocaleString()+' PDT';
+}
+function addTokensInline(){
+  const v=parseFloat(document.getElementById('inline_add_inr').value)||0;
+  if(!v||v<1){toast('⚠️','Enter INR amount','rgba(240,180,41,.12)','rgba(240,180,41,.3)');return;}
+  if(v>U.bal){toast('❌','Insufficient INR balance','rgba(239,68,68,.1)','rgba(239,68,68,.3)');return;}
+  U.bal-=v; U.tokens+=v;
+  tokenTxList.unshift({id:'TK'+Date.now().toString().slice(-6),desc:'Added from INR wallet',tokens:v,type:'added',time:new Date()});
+  updateBals(); renderTokenTx();
+  document.getElementById('inline_add_inr').value='';
+  document.getElementById('inline_add_out').textContent='0 PDT';
+  toast('🪙',v.toLocaleString()+' PDT added to Token Wallet','rgba(245,158,11,.12)','rgba(245,158,11,.3)');
+}
+
+/* ════ RENDER ════ */
+function renderRecent(){
+  const el=document.getElementById('recentList');
+  const list=txList.slice(0,5);
+  if(!list.length){el.innerHTML='<div style="padding:32px 0;text-align:center;color:var(--text3);font-size:.82rem">No transactions yet</div>';return;}
+  el.innerHTML=list.map(txHTML).join('');
+}
+function renderHist(filter){
+  const el=document.getElementById('histList');
+  let list=[...txList];
+  if(filter==='sent') list=list.filter(t=>t.type==='sent');
+  else if(filter==='received') list=list.filter(t=>t.type==='received');
+  else if(filter==='global') list=list.filter(t=>t.type==='global');
+  else if(filter==='pending') list=list.filter(t=>t.status==='pending');
+  if(!list.length){el.innerHTML='<div style="padding:40px 0;text-align:center;color:var(--text3);font-size:.82rem">No transactions</div>';return;}
+  el.innerHTML=list.map(txHTML).join('');
+}
+function renderTokenTx(){
+  const el=document.getElementById('tokenTxList');
+  if(!tokenTxList.length){el.innerHTML='<div style="padding:32px 0;text-align:center;color:var(--text3);font-size:.82rem">No token transactions</div>';return;}
+  el.innerHTML=tokenTxList.map(t=>`
+    <div class="tx-row">
+      <div class="tx-icon" style="background:rgba(245,158,11,.1)">${t.type==='added'?'➕':t.type==='converted'?'🔄':'🌍'}</div>
+      <div class="tx-info"><div class="tx-name">${t.desc}</div><div class="tx-meta">${t.time.toLocaleTimeString()}</div></div>
+      <div class="tx-right"><div class="tx-amt" style="color:var(--token)">${t.type==='used'?'-':'+'} ${t.tokens.toLocaleString()} PDT</div></div>
+    </div>`).join('');
+}
+
+function txHTML(tx){
+  const icons={sent:'↗️',received:'↙️',global:'🌍',requested:'📨'};
+  const iconBgs={sent:'rgba(239,68,68,.1)',received:'rgba(34,197,94,.1)',global:'rgba(245,158,11,.1)',requested:'rgba(91,79,207,.1)'};
+  const amtClass={sent:'dr',received:'cr',global:'dr',requested:''}[tx.type]||'';
+  const pfx={sent:'-',received:'+',global:'-',requested:''}[tx.type]||'';
+  const stClass={success:'st-ok',pending:'st-pend',fail:'st-fail'}[tx.status]||'';
+  const stText={success:'Success',pending:'Pending',fail:'Failed'}[tx.status]||'';
+  const time=tx.time instanceof Date?tx.time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):tx.time;
+  const convLine = tx.converted?`<div class="tx-converted">${tx.flag} ${tx.convertedSym}${Number(tx.converted).toLocaleString()} ${tx.convertedCur}</div>`:'';
+  return `<div class="tx-row">
+    <div class="tx-icon" style="background:${iconBgs[tx.type]}">${icons[tx.type]}</div>
+    <div class="tx-info">
+      <div class="tx-name">${tx.vpa}</div>
+      <div class="tx-meta">${tx.note} · ${time}${tx.country?' · 🌍 '+tx.country:''}</div>
+    </div>
+    <div class="tx-right">
+      <div class="tx-amt ${amtClass}">${pfx}₹${tx.inr.toLocaleString('en-IN')}</div>
+      ${convLine}
+      <div class="tx-st ${stClass}">${stText}</div>
+    </div>
+  </div>`;
+}
+
+function filterH(f,btn){
+  document.querySelectorAll('.hf').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderHist(f);
+}
+
+/* ════ COPY ════ */
+function copyUPI(){ navigator.clipboard.writeText(U?.upi||'mukund@paydesk').catch(()=>{}); toast('📋','UPI ID copied!','rgba(91,79,207,.15)','rgba(91,79,207,.3)'); }
+function copyToken(){ navigator.clipboard.writeText('PDT:'+(U?.username||'mukund')+'.paydesk.global').catch(()=>{}); toast('🪙','Token address copied!','rgba(245,158,11,.12)','rgba(245,158,11,.3)'); }
+
+/* ════ OVERLAYS ════ */
+function openOverlay(id){ document.getElementById(id).classList.add('show'); }
+function closeOverlay(id){ document.getElementById(id).classList.remove('show'); }
+['confirmOverlay','resultOverlay','addTokenOverlay','convertOverlay'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){ if(e.target===this) closeOverlay(id); });
+});
+
+/* ════ TOAST ════ */
+function toast(icon,msg,bg,bd){
+  const t=document.getElementById('toast');
+  document.getElementById('tIcon').textContent=icon;
+  document.getElementById('tMsg').textContent=msg;
+  t.style.background=bg; t.style.border='1px solid '+bd;
+  t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+/* ════ SIMULATE INCOMING ════ */
+function simulateIncoming(){
+  if(!U) return;
+  const amt=18500;
+  U.bal+=amt;
+  const tx={id:'PD'+Date.now().toString().slice(-8),type:'received',vpa:'priti@paydesk',
+    inr:amt,note:'Project milestone payment',time:new Date(),status:'success'};
+  txList.unshift(tx);
+  updateBals(); updateStats(); renderRecent();
+  toast('💚','₹18,500 received from priti@paydesk','rgba(34,197,94,.12)','rgba(34,197,94,.3)');
+}
+</script>
+</body>
+</html>
