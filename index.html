@@ -938,7 +938,7 @@ function calcFX(){
   const r = RATES[selCountry];
   const conv = (inr * r.rate * 0.995).toFixed(2); // 0.5% fee
   document.getElementById('fxConverted').textContent = r.sym+Number(conv).toLocaleString();
-  document.getElementById('fxRate').textContent = `1 INR = ${r.sym}${r.rate.toFixed(4)} · Fee: 0.5%`;
+  document.getElementById('fxRate').textContent = `1 INR = ${r.sym}${r.rate.toFixed(4)} · Fee: 1.5%`;
 }
 
 /* ════ CURRENCY GRID (TOKEN TAB) ════ */
