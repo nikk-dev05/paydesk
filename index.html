@@ -456,7 +456,7 @@ select.form-input option{background:#1a1d2e;}
           <div class="token-flow" id="tokenFlowInfo">
             <strong>🪙 How Token Wallet Works:</strong><br>
             Your INR → <span style="color:var(--token)">PayDesk Tokens (PDT)</span> → <span id="flowTarget">Rubles (RUB)</span><br>
-            ✅ No bank swift · ✅ Instant settlement · ✅ Low 0.5% fee
+            ✅ No bank swift · ✅ Instant settlement · ✅ Low 1.5% fee
           </div>
 
           <div class="quick-row">
@@ -1169,7 +1169,7 @@ function calcQuick(cur){
   const inr=parseFloat(document.getElementById(inrId).value)||0;
   const conv=(inr*r.rate*0.995).toFixed(2);
   document.getElementById(outId).textContent=r.sym+Number(conv).toLocaleString();
-  document.getElementById(rateId).textContent='1 INR = '+r.sym+r.rate.toFixed(4)+' · Fee 0.5%';
+  document.getElementById(rateId).textContent='1 INR = '+r.sym+r.rate.toFixed(4)+' · Fee 1.5%';
 }
 function sendQuick(cur){
   const inrId=cur==='RUB'?'qc_rub_inr':'qc_usd_inr';
